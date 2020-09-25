@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -66,16 +67,17 @@ public class StartupBenchmark {
                     results.add(new Result(durations, failures, tracerJarFile.toString(), jarFile, extractVersion(tracerJarFile)));
                 });
             }
-            System.out.println("version,failures,mean(ms),stddev,min(ms),max(ms),jarFile,tracerJarFile");
+            results.sort(Comparator.comparingInt(r -> versionToNumber(r.version)));
+            System.out.println("version,jar,failures,mean(ms),stddev,min(ms),max(ms)");
+            String jarFileName = jarFile.substring(jarFile.lastIndexOf('/') + 1);
             for (Result result : results) {
                 System.out.println(result.version
+                        + "," + jarFileName
                         + "," + result.failureCount
                         + "," + result.mean(MILLISECONDS)
                         + "," + result.stdDev(MILLISECONDS)
                         + "," + result.min(MILLISECONDS)
-                        + "," + result.max(MILLISECONDS)
-                        + "," + result.jarFile
-                        + "," + result.tracerJarFile);
+                        + "," + result.max(MILLISECONDS));
             }
         } else {
             System.err.println("usage: <jar to load class from> <min tracer version>? <max tracer version>?");
@@ -192,5 +194,11 @@ public class StartupBenchmark {
         int versionStart = fileName.indexOf("dd-java-agent-") + "dd-java-agent-".length();
         int versionEnd = fileName.indexOf(".jar");
         return fileName.substring(versionStart, versionEnd);
+    }
+
+    private static int versionToNumber(String version) {
+        int start = version.indexOf('.') + 1;
+        int end = version.indexOf('.', start);
+        return Integer.parseInt(version, start, end, 10);
     }
 }
