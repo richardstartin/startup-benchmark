@@ -1,5 +1,6 @@
 package datadog.trace.benchmark;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -81,7 +82,7 @@ public class StartupBenchmark {
         }
     }
 
-    private static void getJars(int minVersion, int maxVersion) {
+    private static void getJars(int minVersion, int maxVersion) throws IOException {
         HttpClient client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.NORMAL)
@@ -91,6 +92,9 @@ public class StartupBenchmark {
             maxVersion = Integer.MAX_VALUE;
         }
         Path tracersDir = Paths.get(System.getProperty("user.dir")).resolve("tracers");
+        if (!Files.exists(tracersDir)) {
+            Files.createDirectory(tracersDir);
+        }
         for (int version = minVersion; version <= maxVersion; ++version) {
             Path tracerLoc = tracersDir.resolve("dd-java-agent-0." + version + ".0.jar");
             if (!Files.exists(tracerLoc)) {
