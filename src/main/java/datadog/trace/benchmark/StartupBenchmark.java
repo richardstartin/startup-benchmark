@@ -166,7 +166,7 @@ public class StartupBenchmark {
             return min;
         }
 
-        double max(TimeUnit tu) {
+        long max(TimeUnit tu) {
             long max = Long.MIN_VALUE;
             for (int i = 0; i < durations.length; ++i) {
                 if (!failed[i]) {
